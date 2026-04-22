@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Update Attendance Percentage{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <h2 class="mb-4">Update Attendance Percentage</h2>
+        <div class="card">
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="moodle_id" class="form-label">Select Student</label>
+                        <select class="form-select" id="moodle_id" name="moodle_id" required>
+                            <option value="">-- Choose Student --</option>
+                            {% for student in students %}
+                            <option value="{{ student.moodle_id }}">
+                                {{ student.moodle_id }} - {{ student.name }} 
+                                (Current: {{ student.attendance_percent or 0 }}%)
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="attendance_percent" class="form-label">Attendance Percentage</label>
+                        <input type="number" class="form-control" id="attendance_percent" name="attendance_percent" 
+                               min="0" max="100" step="0.01" required>
+                        <div class="form-text">Enter percentage between 0 and 100</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update Percentage</button>
+                    <a href="{{ url_for('view_attendance') }}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

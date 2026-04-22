@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Marks Detail{% endblock %}
+{% block content %}
+<div class="mb-4">
+    <a href="{{ url_for('view_marks') }}" class="btn btn-secondary">&larr; Back to All Marks</a>
+</div>
+
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">Detailed Marks Report</h4>
+    </div>
+    <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <p><strong>Moodle ID:</strong> {{ student.moodle_id }}</p>
+                <p><strong>Roll No:</strong> {{ student.roll_no }}</p>
+                <p><strong>Name:</strong> {{ student.name }}</p>
+                <p><strong>Email:</strong> {{ student.moodle_email }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Test:</strong> {{ test.test_name }}</p>
+                <p><strong>Attempt Number:</strong> {{ attempt_no }}</p>
+                <p><strong>Test Date:</strong> {{ test.created_at.strftime('%Y-%m-%d') if test.created_at else 'N/A' }}</p>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>Question Number</th>
+                        <th>Maximum Marks</th>
+                        <th>Obtained Marks</th>
+                        <th>Percentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mark in marks_detail %}
+                    <tr>
+                        <td>Question {{ mark.question_number }}</td>
+                        <td>{{ mark.max_marks }}</td>
+                        <td>{{ mark.obtained_marks or 0 }}</td>
+                        <td>
+                            {% set q_percentage = ((mark.obtained_marks or 0) / mark.max_marks * 100) | round(2) %}
+                            <span class="badge {% if q_percentage >= 40 %}bg-success{% else %}bg-danger{% endif %}">
+                                {{ q_percentage }}%
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot class="table-secondary">
+                    <tr>
+                        <th>Total</th>
+                        <th>{{ total_max }}</th>
+                        <th>{{ total_obtained }}</th>
+                        <th>
+                            <span class="badge {% if percentage >= 40 %}bg-success{% else %}bg-danger{% endif %} fs-6">
+                                {{ percentage }}%
+                            </span>
+                        </th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div class="alert {% if percentage >= 40 %}alert-success{% else %}alert-danger{% endif %} mt-3">
+            <strong>Result:</strong> {% if percentage >= 40 %}PASS{% else %}FAIL{% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

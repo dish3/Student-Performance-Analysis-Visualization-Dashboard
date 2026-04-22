@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Create Test{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <h2 class="mb-4">Create New Test</h2>
+        <div class="card">
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="test_name" class="form-label">Test Name</label>
+                        <input type="text" class="form-control" id="test_name" name="test_name" 
+                               placeholder="e.g., Unit Test 1, Mid-Term, Final Exam" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Create Test & Add Questions</button>
+                    <a href="{{ url_for('view_tests') }}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

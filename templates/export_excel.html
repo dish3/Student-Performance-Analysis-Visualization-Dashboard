@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Export to Excel{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-lg-8">
+    <h4 class="mb-4"><i class="bi bi-file-earmark-excel"></i> Excel Export &amp; Import</h4>
+
+    <!-- Analytics export -->
+    <div class="card mb-4 border-success">
+      <div class="card-header bg-success text-white">
+        <i class="bi bi-bar-chart-fill"></i> Analytics Export (with Charts)
+      </div>
+      <div class="card-body">
+        <p class="mb-3">
+          Download a rich Excel workbook with <strong>5 sheets</strong>:
+          Summary dashboard, Marks Analysis, Attendance, Students, and Raw Marks —
+          each with embedded bar/pie charts and colour-coded cells.
+        </p>
+        <a href="{{ url_for('export_analytics') }}" class="btn btn-success">
+          <i class="bi bi-download"></i> Download Analytics Report
+        </a>
+      </div>
+    </div>
+
+    <!-- Raw data export -->
+    <div class="card mb-4">
+      <div class="card-header bg-primary text-white">
+        <i class="bi bi-table"></i> Raw Data Export (select sheets)
+      </div>
+      <div class="card-body">
+        <p>Select the data you want to export. All selected data will be in one file with multiple sheets.</p>
+        <form method="POST">
+          <div class="mb-3">
+            <h6>Select sheets to include:</h6>
+            {% set items = [
+              ('students',         'Students – Moodle ID, Roll No, Name, Email, Phone'),
+              ('tests',            'Tests – Test ID, Name, Created At'),
+              ('test_questions',   'Test Questions – Question ID, Test, Q No, Max Marks'),
+              ('marks',            'Student Test Marks – all attempts'),
+              ('attendance_daily', 'Attendance Daily – Moodle ID, Date, Status'),
+              ('attendance_percent','Attendance Percentage – Moodle ID, %'),
+              ('faculty',          'Faculty – ID, Username, Role'),
+            ] %}
+            {% for name, label in items %}
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="{{ name }}" id="{{ name }}"
+                     {% if name != 'faculty' %}checked{% endif %}>
+              <label class="form-check-label" for="{{ name }}">{{ label }}</label>
+            </div>
+            {% endfor %}
+          </div>
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-download"></i> Download Raw Data
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Import link -->
+    <div class="card border-warning">
+      <div class="card-header bg-warning text-dark">
+        <i class="bi bi-upload"></i> Import Data from Excel
+      </div>
+      <div class="card-body">
+        <p class="mb-3">
+          Bulk-import <strong>Students</strong>, <strong>Attendance</strong>, and
+          <strong>Marks</strong> by uploading a formatted Excel file.
+          Existing records are upserted automatically.
+        </p>
+        <a href="{{ url_for('import_excel') }}" class="btn btn-warning text-dark">
+          <i class="bi bi-cloud-upload"></i> Go to Import
+        </a>
+        <a href="{{ url_for('import_template') }}" class="btn btn-outline-secondary ms-2">
+          <i class="bi bi-file-earmark-arrow-down"></i> Download Template
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

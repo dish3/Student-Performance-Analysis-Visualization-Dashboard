@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Admin Dashboard</h2>
+
+<div class="row">
+    <div class="col-md-3 mb-3">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <h5 class="card-title">Total Students</h5>
+                <h2>{{ total_students }}</h2>
+                <a href="{{ url_for('view_students') }}" class="btn btn-light btn-sm">View All</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <h5 class="card-title">Total Tests</h5>
+                <h2>{{ total_tests }}</h2>
+                <a href="{{ url_for('view_tests') }}" class="btn btn-light btn-sm">View All</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-white bg-info">
+            <div class="card-body">
+                <h5 class="card-title">Total Attempts</h5>
+                <h2>{{ total_attempts }}</h2>
+                <a href="{{ url_for('view_marks') }}" class="btn btn-light btn-sm">View All</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-white bg-warning">
+            <div class="card-body">
+                <h5 class="card-title">Attendance Records</h5>
+                <h2>{{ total_attendance }}</h2>
+                <a href="{{ url_for('view_attendance') }}" class="btn btn-light btn-sm">View All</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                Quick Actions
+            </div>
+            <div class="list-group list-group-flush">
+                <a href="{{ url_for('add_student') }}" class="list-group-item list-group-item-action">Add New Student</a>
+                <a href="{{ url_for('create_test') }}" class="list-group-item list-group-item-action">Create New Test</a>
+                <a href="{{ url_for('enter_marks') }}" class="list-group-item list-group-item-action">Enter Student Marks</a>
+                <a href="{{ url_for('add_attendance') }}" class="list-group-item list-group-item-action">Add Attendance</a>
+                <a href="{{ url_for('analysis') }}" class="list-group-item list-group-item-action">View Analysis Dashboard</a>
+                <a href="{{ url_for('export_excel') }}" class="list-group-item list-group-item-action">Export to Excel</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

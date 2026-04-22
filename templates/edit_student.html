@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Student{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <h2 class="mb-4">Edit Student: {{ student.moodle_id }}</h2>
+        <div class="card">
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Moodle ID</label>
+                        <input type="text" class="form-control" value="{{ student.moodle_id }}" disabled>
+                        <div class="form-text">Moodle ID cannot be changed</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="roll_no" class="form-label">Roll Number</label>
+                        <input type="text" class="form-control" id="roll_no" name="roll_no" value="{{ student.roll_no }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Student Name</label>
+                        <input type="text" class="form-control" id="name" name="name" value="{{ student.name }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="moodle_email" class="form-label">Moodle Email</label>
+                        <input type="email" class="form-control" id="moodle_email" name="moodle_email" value="{{ student.moodle_email }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Phone</label>
+                        <input type="text" class="form-control" id="phone" name="phone" value="{{ student.phone }}" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update Student</button>
+                    <a href="{{ url_for('view_students') }}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

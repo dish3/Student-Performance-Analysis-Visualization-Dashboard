@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Test Analysis{% endblock %}
+{% block content %}
+<div class="mb-4">
+    <a href="{{ url_for('view_tests') }}" class="btn btn-secondary">&larr; Back to Tests</a>
+</div>
+
+<h2 class="mb-4">Analysis: {{ test.test_name }}</h2>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h6>Total Attempts</h6>
+                <h3>{{ stats.total_attempts or 0 }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h6>Average Marks</h6>
+                <h3>{{ "%.2f"|format(stats.avg_marks or 0) }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h6>Highest Score</h6>
+                <h3>{{ stats.max_marks or 0 }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h6>Lowest Score</h6>
+                <h3>{{ stats.min_marks or 0 }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">Student Performance</div>
+    <div class="card-body">
+        <canvas id="testMarksChart"></canvas>
+    </div>
+</div>
+
+<script>
+const marksData = {{ marks_data|tojson }};
+const labels = marksData.map(d => d.name + ' (Attempt ' + d.attempt_no + ')');
+const values = marksData.map(d => (d.total_obtained / d.total_max * 100).toFixed(2));
+
+new Chart(document.getElementById('testMarksChart'), {
+    type: 'bar',
+    data: {
+        labels: labels,
+        datasets: [{
+            label: 'Percentage',
+            data: values,
+            backgroundColor: 'rgba(75, 192, 192, 0.5)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 100
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

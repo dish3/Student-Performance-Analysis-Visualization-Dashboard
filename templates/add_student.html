@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Add Student{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <h2 class="mb-4">Add New Student</h2>
+        <div class="card">
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="moodle_id" class="form-label">Moodle ID</label>
+                        <input type="text" class="form-control" id="moodle_id" name="moodle_id" required>
+                        <div class="form-text">Primary identifier for the student</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="roll_no" class="form-label">Roll Number</label>
+                        <input type="text" class="form-control" id="roll_no" name="roll_no" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Student Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="moodle_email" class="form-label">Moodle Email</label>
+                        <input type="email" class="form-control" id="moodle_email" name="moodle_email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Phone</label>
+                        <input type="text" class="form-control" id="phone" name="phone" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Student</button>
+                    <a href="{{ url_for('view_students') }}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

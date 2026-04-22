@@ -1,0 +1,499 @@
+{% extends "base.html" %}
+{% block title %}Advanced Analytics{% endblock %}
+{% block page_title %}<i class="fa-solid fa-chart-line me-2 text-primary"></i> Advanced Analytics{% endblock %}
+
+{% block content %}
+
+<!-- ── Page header ─────────────────────────────────────── -->
+<div class="page-header">
+  <h4>Student Performance Analytics Dashboard</h4>
+  <a href="{{ url_for('export_analysis') }}" class="btn btn-success">
+    <i class="fa-solid fa-file-excel me-2"></i>Export Full Analysis
+  </a>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 1 – Overall Class Analysis
+     ══════════════════════════════════════════════════════ -->
+<div class="mb-1"><span class="section-heading">
+  <i class="fa-solid fa-gauge-high me-2"></i>Overall Class Analysis
+</span></div>
+
+<div class="row g-3 mb-4">
+
+  <!-- Total Students -->
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="stat-card">
+      <div class="stat-icon blue"><i class="fa-solid fa-users"></i></div>
+      <div class="stat-info">
+        <div class="stat-value">{{ overall.total_students }}</div>
+        <div class="stat-label">Total Students</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Avg Score -->
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="stat-card">
+      <div class="stat-icon green"><i class="fa-solid fa-star-half-stroke"></i></div>
+      <div class="stat-info">
+        <div class="stat-value">{{ overall.avg_marks_pct }}%</div>
+        <div class="stat-label">Avg Score</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Avg Attendance -->
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="stat-card">
+      <div class="stat-icon teal"><i class="fa-solid fa-calendar-check"></i></div>
+      <div class="stat-info">
+        <div class="stat-value">{{ overall.avg_attendance }}%</div>
+        <div class="stat-label">Avg Attendance</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pass % -->
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="stat-card">
+      <div class="stat-icon orange"><i class="fa-solid fa-circle-check"></i></div>
+      <div class="stat-info">
+        <div class="stat-value">{{ overall.pass_pct }}%</div>
+        <div class="stat-label">Pass Rate</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Weak Students -->
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="stat-card">
+      <div class="stat-icon red"><i class="fa-solid fa-triangle-exclamation"></i></div>
+      <div class="stat-info">
+        <div class="stat-value">{{ overall.weak_students|length }}</div>
+        <div class="stat-label">Weak (&lt;40%)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Class Topper -->
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="topper-card">
+      <div class="d-flex align-items-center gap-3">
+        <div class="stat-icon"><i class="fa-solid fa-trophy"></i></div>
+        <div class="stat-info">
+          <div class="stat-value">
+            {{ overall.topper.name if overall.topper else 'N/A' }}
+          </div>
+          <div class="stat-label">
+            Class Topper
+            {% if overall.topper %}· {{ overall.topper.avg_pct }}%{% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Weak students table -->
+{% if overall.weak_students %}
+<div class="card mb-4">
+  <div class="card-header d-flex align-items-center gap-2">
+    <i class="fa-solid fa-triangle-exclamation text-danger"></i>
+    Weak Students — Score &lt; 40%
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="analytics-table">
+        <thead><tr>
+          <th>Moodle ID</th><th>Roll No</th><th>Name</th><th>Avg Score %</th>
+        </tr></thead>
+        <tbody>
+          {% for s in overall.weak_students %}
+          <tr class="row-danger">
+            <td>{{ s.moodle_id }}</td><td>{{ s.roll_no }}</td><td>{{ s.name }}</td>
+            <td><span class="score-badge fail">{{ s.avg_pct }}%</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 2 – Marks Analysis
+     ══════════════════════════════════════════════════════ -->
+<div class="mb-1 mt-2"><span class="section-heading">
+  <i class="fa-solid fa-chart-bar me-2"></i>Marks Analysis
+</span></div>
+
+<!-- Row 1: Avg per test + Pass/Fail + Distribution -->
+<div class="row g-3 mb-3">
+  <div class="col-md-6">
+    <div class="chart-card card">
+      <div class="card-header"><i class="fa-solid fa-chart-column me-2"></i>Average Score % per Test</div>
+      <div class="chart-body"><canvas id="avgTestChart"></canvas></div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="chart-card card">
+      <div class="card-header"><i class="fa-solid fa-chart-pie me-2"></i>Pass vs Fail</div>
+      <div class="chart-body"><canvas id="passFailChart"></canvas></div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="chart-card card">
+      <div class="card-header"><i class="fa-solid fa-chart-bar me-2"></i>Marks Distribution</div>
+      <div class="chart-body"><canvas id="distChart"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- Row 2: Student comparison -->
+<div class="card mb-4">
+  <div class="card-header"><i class="fa-solid fa-ranking-star me-2"></i>Student Performance Comparison</div>
+  <div class="card-body p-0" style="overflow:hidden">
+    <div style="padding:16px; height:{{ [[marks.comparison|length * 30, 220]|max, 600]|min }}px; position:relative">
+      <canvas id="comparisonChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Top 10 students table -->
+<div class="card mb-4">
+  <div class="card-header d-flex align-items-center gap-2">
+    <i class="fa-solid fa-medal text-warning"></i> Top 10 Students by Score
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="analytics-table">
+        <thead><tr>
+          <th>#</th><th>Moodle ID</th><th>Roll No</th><th>Name</th>
+          <th>Obtained</th><th>Max</th><th>Score %</th>
+        </tr></thead>
+        <tbody>
+          {% for s in marks.top10 %}
+          <tr class="{{ 'row-success' if s.avg_pct >= 60 else ('row-warning' if s.avg_pct >= 40 else 'row-danger') }}">
+            <td>
+              <span class="rank-badge {{ 'gold' if loop.index == 1 else ('silver' if loop.index == 2 else ('bronze' if loop.index == 3 else '')) }}">
+                {{ loop.index }}
+              </span>
+            </td>
+            <td>{{ s.moodle_id }}</td>
+            <td>{{ s.roll_no }}</td>
+            <td><strong>{{ s.name }}</strong></td>
+            <td>{{ s.total_obtained }}</td>
+            <td>{{ s.total_max }}</td>
+            <td>
+              <span class="score-badge {{ 'pass' if s.avg_pct >= 40 else 'fail' }}">
+                {{ s.avg_pct }}%
+              </span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 3 – Attendance Analysis
+     ══════════════════════════════════════════════════════ -->
+<div class="mb-1 mt-2"><span class="section-heading">
+  <i class="fa-solid fa-calendar-check me-2"></i>Attendance Analysis
+</span></div>
+
+<div class="row g-3 mb-3">
+  <div class="col-md-4">
+    <div class="chart-card card">
+      <div class="card-header"><i class="fa-solid fa-chart-pie me-2"></i>Present vs Absent</div>
+      <div class="chart-body"><canvas id="attPieChart"></canvas></div>
+    </div>
+  </div>
+  <div class="col-md-8">
+    <div class="chart-card card">
+      <div class="card-header"><i class="fa-solid fa-chart-line me-2"></i>Monthly Attendance Trend</div>
+      <div class="chart-body"><canvas id="monthlyChart"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- Top 10 attendance -->
+<div class="card mb-4">
+  <div class="card-header d-flex align-items-center gap-2">
+    <i class="fa-solid fa-award text-success"></i> Top 10 Students by Attendance
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="analytics-table">
+        <thead><tr>
+          <th>#</th><th>Moodle ID</th><th>Roll No</th><th>Name</th><th>Attendance %</th>
+        </tr></thead>
+        <tbody>
+          {% for s in att.top10_att %}
+          <tr class="{{ 'row-success' if s.att_pct >= 75 else 'row-warning' }}">
+            <td>
+              <span class="rank-badge {{ 'gold' if loop.index == 1 else ('silver' if loop.index == 2 else ('bronze' if loop.index == 3 else '')) }}">
+                {{ loop.index }}
+              </span>
+            </td>
+            <td>{{ s.moodle_id }}</td><td>{{ s.roll_no }}</td>
+            <td><strong>{{ s.name }}</strong></td>
+            <td>
+              <span class="score-badge {{ 'pass' if s.att_pct >= 75 else 'warn' }}">
+                {{ s.att_pct }}%
+              </span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Defaulters -->
+{% if att.defaulters %}
+<div class="card mb-4">
+  <div class="card-header d-flex align-items-center gap-2">
+    <i class="fa-solid fa-circle-exclamation text-warning"></i>
+    Defaulters — Attendance &lt; 75%
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="analytics-table">
+        <thead><tr>
+          <th>Moodle ID</th><th>Roll No</th><th>Name</th><th>Attendance %</th>
+        </tr></thead>
+        <tbody>
+          {% for s in att.defaulters %}
+          <tr class="row-warning">
+            <td>{{ s.moodle_id }}</td><td>{{ s.roll_no }}</td>
+            <td>{{ s.name }}</td>
+            <td><span class="score-badge warn">{{ s.att_pct }}%</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 4 – Filter Students
+     ══════════════════════════════════════════════════════ -->
+<div class="mb-1 mt-2"><span class="section-heading">
+  <i class="fa-solid fa-filter me-2"></i>Filter Students
+</span></div>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <div class="filter-group">
+      <button class="filter-btn" data-filter="top10">
+        <i class="fa-solid fa-trophy"></i> Top 10
+      </button>
+      <button class="filter-btn" data-filter="top5">
+        <i class="fa-solid fa-star"></i> Top 5
+      </button>
+      <button class="filter-btn" data-filter="below_avg">
+        <i class="fa-solid fa-arrow-trend-down"></i> Below Average
+      </button>
+      <button class="filter-btn btn-orange" data-filter="att_below75">
+        <i class="fa-solid fa-calendar-xmark"></i> Attendance &lt; 75%
+      </button>
+      <button class="filter-btn btn-red" data-filter="marks_below40">
+        <i class="fa-solid fa-triangle-exclamation"></i> Marks &lt; 40%
+      </button>
+    </div>
+
+    <div id="filterResults">
+      <p class="text-muted mb-0" style="font-size:0.875rem">
+        <i class="fa-solid fa-hand-pointer me-1"></i> Click a filter above to load results.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ── Chart.js data + init ─────────────────────────────── -->
+<script>
+const marksData = {
+  avgPerTest:    {{ marks.avg_per_test    | tojson }},
+  passFail:      {{ marks.pass_fail       | tojson }},
+  distribution:  {{ marks.distribution   | tojson }},
+  comparison:    {{ marks.comparison      | tojson }},
+  highestPerTest:{{ marks.highest_per_test| tojson }},
+};
+const attData = {
+  pie:     {{ att.pie_data      | tojson }},
+  monthly: {{ att.monthly_trend | tojson }},
+};
+
+// ── Chart factory ──────────────────────────────────────
+function makeChart(id, type, labels, datasets, extra={}) {
+  const ctx = document.getElementById(id);
+  if (!ctx) return null;
+  if (ctx._chart) ctx._chart.destroy();
+  ctx._chart = new Chart(ctx, {
+    type,
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 12 } }
+      },
+      ...extra
+    }
+  });
+  return ctx._chart;
+}
+
+const gridColor = 'rgba(0,0,0,0.05)';
+const scaleOpts = (label='') => ({
+  scales: {
+    x: { grid: { color: gridColor }, ticks: { font: { size: 11 } } },
+    y: { grid: { color: gridColor }, ticks: { font: { size: 11 } },
+         title: { display: !!label, text: label } }
+  }
+});
+
+// 1. Avg score per test
+if (marksData.avgPerTest.length) {
+  makeChart('avgTestChart', 'bar',
+    marksData.avgPerTest.map(r => r.test_name),
+    [{ label: 'Avg Score %',
+       data: marksData.avgPerTest.map(r => r.avg_pct),
+       backgroundColor: 'rgba(67,97,238,0.8)',
+       borderRadius: 6, borderSkipped: false }],
+    { ...scaleOpts('%'), scales: { ...scaleOpts('%').scales, y: { ...scaleOpts('%').scales.y, min: 0, max: 100 } } }
+  );
+}
+
+// 2. Pass vs Fail pie
+if (marksData.passFail && (marksData.passFail.pass_count + marksData.passFail.fail_count) > 0) {
+  makeChart('passFailChart', 'doughnut',
+    ['Pass', 'Fail'],
+    [{ data: [marksData.passFail.pass_count, marksData.passFail.fail_count],
+       backgroundColor: ['#16a34a','#e63946'],
+       borderWidth: 0, hoverOffset: 6 }],
+    { cutout: '60%' }
+  );
+}
+
+// 3. Marks distribution
+if (marksData.distribution) {
+  const d = marksData.distribution;
+  if (d['0_40'] + d['40_60'] + d['60_80'] + d['80_100'] > 0) {
+    makeChart('distChart', 'bar',
+      ['0–40%','40–60%','60–80%','80–100%'],
+      [{ label: 'Students',
+         data: [d['0_40'], d['40_60'], d['60_80'], d['80_100']],
+         backgroundColor: ['#e63946','#ff9f1c','#ffd166','#06d6a0'],
+         borderRadius: 6, borderSkipped: false }],
+      { plugins: { legend: { display: false } }, ...scaleOpts() }
+    );
+  }
+}
+
+// 4. Student comparison (horizontal bar)
+if (marksData.comparison.length) {
+  makeChart('comparisonChart', 'bar',
+    marksData.comparison.map(r => r.name),
+    [{ label: 'Avg Score %',
+       data: marksData.comparison.map(r => r.avg_pct),
+       backgroundColor: marksData.comparison.map(r =>
+         r.avg_pct >= 60 ? 'rgba(6,214,160,0.75)' :
+         r.avg_pct >= 40 ? 'rgba(255,159,28,0.75)' : 'rgba(230,57,70,0.75)'
+       ),
+       borderRadius: 4, borderSkipped: false }],
+    { indexAxis: 'y',
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { min: 0, max: 100, grid: { color: gridColor }, ticks: { font: { size: 10 } } },
+        y: { grid: { display: false }, ticks: { font: { size: 10 } } }
+      } }
+  );
+}
+
+// 5. Present vs Absent doughnut
+if (attData.pie && (attData.pie.total_present + attData.pie.total_absent) > 0) {
+  makeChart('attPieChart', 'doughnut',
+    ['Present','Absent'],
+    [{ data: [attData.pie.total_present, attData.pie.total_absent],
+       backgroundColor: ['#06d6a0','#e63946'],
+       borderWidth: 0, hoverOffset: 6 }],
+    { cutout: '60%' }
+  );
+}
+
+// 6. Monthly trend line
+if (attData.monthly && attData.monthly.length) {
+  makeChart('monthlyChart', 'line',
+    attData.monthly.map(r => r.month),
+    [
+      { label: 'Present',
+        data: attData.monthly.map(r => r.present_cnt),
+        borderColor: '#06d6a0', backgroundColor: 'rgba(6,214,160,0.1)',
+        tension: 0.4, fill: true, pointRadius: 4, pointHoverRadius: 6 },
+      { label: 'Absent',
+        data: attData.monthly.map(r => r.absent_cnt),
+        borderColor: '#e63946', backgroundColor: 'rgba(230,57,70,0.08)',
+        tension: 0.4, fill: true, pointRadius: 4, pointHoverRadius: 6 },
+    ],
+    { ...scaleOpts(), scales: { ...scaleOpts().scales, y: { ...scaleOpts().scales.y, beginAtZero: true } } }
+  );
+}
+
+// ── Filter buttons ─────────────────────────────────────
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', function () {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    const filter = this.dataset.filter;
+    const div = document.getElementById('filterResults');
+
+    div.innerHTML = `<div class="filter-loading">
+      <div class="spinner-sm"></div> Loading results…
+    </div>`;
+
+    fetch(`/admin/api/top-students?filter=${filter}`)
+      .then(r => r.json())
+      .then(data => {
+        if (!data.length) {
+          div.innerHTML = '<p class="text-muted mb-0" style="font-size:.875rem">No students match this filter.</p>';
+          return;
+        }
+        let html = `<div class="table-responsive">
+          <table class="analytics-table">
+            <thead><tr>
+              <th>#</th><th>Moodle ID</th><th>Roll No</th><th>Name</th>
+              <th>Avg Score %</th><th>Attendance %</th>
+            </tr></thead><tbody>`;
+        data.forEach((s, i) => {
+          const rowCls   = s.avg_pct >= 60 ? 'row-success' : (s.avg_pct >= 40 ? '' : 'row-danger');
+          const scoreCls = s.avg_pct >= 40 ? 'pass' : 'fail';
+          const attCls   = s.att_pct >= 75 ? 'pass' : 'warn';
+          const rankCls  = i === 0 ? 'gold' : (i === 1 ? 'silver' : (i === 2 ? 'bronze' : ''));
+          html += `<tr class="${rowCls}">
+            <td><span class="rank-badge ${rankCls}">${i+1}</span></td>
+            <td>${s.moodle_id}</td><td>${s.roll_no}</td>
+            <td><strong>${s.name}</strong></td>
+            <td><span class="score-badge ${scoreCls}">${s.avg_pct}%</span></td>
+            <td><span class="score-badge ${attCls}">${s.att_pct}%</span></td>
+          </tr>`;
+        });
+        html += '</tbody></table></div>';
+        div.innerHTML = html;
+      })
+      .catch(() => {
+        div.innerHTML = '<p class="text-danger mb-0" style="font-size:.875rem"><i class="fa-solid fa-circle-xmark me-1"></i>Failed to load data.</p>';
+      });
+  });
+});
+</script>
+{% endblock %}

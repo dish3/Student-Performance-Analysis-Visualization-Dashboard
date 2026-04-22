@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Add Test Questions{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-10">
+        <h2 class="mb-4">Add Questions for: {{ test.test_name }}</h2>
+        
+        {% if step == 1 %}
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Step 1: Enter Number of Questions</h5>
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="num_questions" class="form-label">Total Number of Questions</label>
+                        <input type="number" class="form-control" id="num_questions" name="num_questions" 
+                               min="1" max="100" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Next: Enter Max Marks</button>
+                    <a href="{{ url_for('view_tests') }}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+        {% elif step == 2 %}
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Step 2: Enter Maximum Marks for Each Question</h5>
+                <form method="POST">
+                    <input type="hidden" name="num_questions" value="{{ num_questions }}">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Question Number</th>
+                                    <th>Maximum Marks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for i in range(1, num_questions + 1) %}
+                                <tr>
+                                    <td>Question {{ i }}</td>
+                                    <td>
+                                        <input type="number" class="form-control" name="max_marks_{{ i }}" 
+                                               min="1" max="100" required>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <button type="submit" class="btn btn-success">Save All Questions</button>
+                    <a href="{{ url_for('view_tests') }}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

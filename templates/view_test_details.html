@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Test Details{% endblock %}
+{% block content %}
+<div class="mb-4">
+    <a href="{{ url_for('view_tests') }}" class="btn btn-secondary">&larr; Back to Tests</a>
+</div>
+
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">Test Details: {{ test.test_name }}</h4>
+    </div>
+    <div class="card-body">
+        <p><strong>Test ID:</strong> {{ test.test_id }}</p>
+        <p><strong>Created:</strong> {{ test.created_at.strftime('%Y-%m-%d %H:%M') if test.created_at else 'N/A' }}</p>
+        
+        <h5 class="mt-4">Questions</h5>
+        {% if questions %}
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>Question Number</th>
+                        <th>Maximum Marks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for q in questions %}
+                    <tr>
+                        <td>Question {{ q.question_number }}</td>
+                        <td>{{ q.max_marks }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot class="table-secondary">
+                    <tr>
+                        <th>Total</th>
+                        <th>{{ questions|sum(attribute='max_marks') }}</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-warning">
+            No questions added yet. <a href="{{ url_for('add_test_questions', test_id=test.test_id) }}">Add questions</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Import Excel{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+
+    <h4 class="mb-4">
+      <i class="bi bi-upload"></i> Import Data from Excel
+    </h4>
+
+    <!-- Upload card -->
+    <div class="card mb-4">
+      <div class="card-header bg-primary text-white">Upload Excel File</div>
+      <div class="card-body">
+        <p class="text-muted mb-3">
+          Upload an <code>.xlsx</code> file with one or more of the following sheet names:
+          <strong>Students</strong>, <strong>Attendance</strong>, <strong>Marks</strong>.
+          Existing records are updated (upsert); new records are inserted.
+        </p>
+
+        <form method="POST" enctype="multipart/form-data">
+          <div class="mb-3">
+            <label for="excel_file" class="form-label">Choose Excel File</label>
+            <input class="form-control" type="file" id="excel_file" name="excel_file"
+                   accept=".xlsx,.xls" required>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-success">
+              <i class="bi bi-cloud-upload"></i> Import
+            </button>
+            <a href="{{ url_for('import_template') }}" class="btn btn-outline-primary">
+              <i class="bi bi-download"></i> Download Template
+            </a>
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Column reference -->
+    <div class="card mb-4">
+      <div class="card-header">Expected Column Format</div>
+      <div class="card-body p-0">
+        <table class="table table-sm table-bordered mb-0">
+          <thead class="table-light">
+            <tr><th>Sheet Name</th><th>Required Columns (Row 1 = Header)</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge bg-primary">Students</span></td>
+              <td><code>Moodle ID | Roll No | Name | Email | Phone</code></td>
+            </tr>
+            <tr>
+              <td><span class="badge bg-success">Attendance</span></td>
+              <td><code>Moodle ID | Date (YYYY-MM-DD) | Status (Present/Absent)</code></td>
+            </tr>
+            <tr>
+              <td><span class="badge bg-warning text-dark">Marks</span></td>
+              <td><code>Moodle ID | Test Name | Attempt No | Q No | Obtained Marks</code>
+                <br><small class="text-muted">Test and questions must already exist in the system.</small>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Results -->
+    {% if results %}
+    <div class="card">
+      <div class="card-header bg-success text-white">Import Results</div>
+      <div class="card-body">
+        {% for sheet, res in results.items() %}
+        <h6 class="mt-2">Sheet: <strong>{{ sheet }}</strong></h6>
+        <div class="d-flex gap-3 mb-2">
+          <span class="badge bg-success fs-6">✓ {{ res.inserted }} inserted / updated</span>
+          {% if res.skipped %}
+          <span class="badge bg-warning text-dark fs-6">⚠ {{ res.skipped }} skipped</span>
+          {% endif %}
+        </div>
+        {% if res.errors %}
+        <details>
+          <summary class="text-danger" style="cursor:pointer">
+            {{ res.errors|length }} warning(s) – click to expand
+          </summary>
+          <ul class="mt-2 small text-danger">
+            {% for err in res.errors %}
+            <li>{{ err }}</li>
+            {% endfor %}
+          </ul>
+        </details>
+        {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

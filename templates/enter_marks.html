@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Enter Marks{% endblock %}
+{% block content %}
+<h2 class="mb-4">Enter Student Marks</h2>
+
+{% if step == 1 %}
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Step 1: Select Test, Student, and Attempt</h5>
+        <form method="POST">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="test_id" class="form-label">Select Test</label>
+                    <select class="form-select" id="test_id" name="test_id" required>
+                        <option value="">-- Choose Test --</option>
+                        {% for test in tests %}
+                        <option value="{{ test.test_id }}">{{ test.test_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="moodle_id" class="form-label">Select Student</label>
+                    <select class="form-select" id="moodle_id" name="moodle_id" required>
+                        <option value="">-- Choose Student --</option>
+                        {% for student in students %}
+                        <option value="{{ student.moodle_id }}">{{ student.moodle_id }} - {{ student.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="attempt_no" class="form-label">Attempt Number</label>
+                    <input type="number" class="form-control" id="attempt_no" name="attempt_no" 
+                           min="1" value="1" required>
+                    <div class="form-text">Enter attempt number (1, 2, 3...)</div>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Next: Enter Marks</button>
+        </form>
+    </div>
+</div>
+{% elif step == 2 %}
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Step 2: Enter Marks for Each Question</h5>
+        <div class="alert alert-info">
+            <strong>Test:</strong> {{ test.test_name }}<br>
+            <strong>Student:</strong> {{ student.moodle_id }} - {{ student.name }}<br>
+            <strong>Attempt:</strong> #{{ attempt_no }}
+            {% if attempts %}
+            <br><strong>Previous Attempts:</strong> {{ attempts|join(', ') }}
+            {% endif %}
+        </div>
+        <form method="POST">
+            <input type="hidden" name="test_id" value="{{ test.test_id }}">
+            <input type="hidden" name="moodle_id" value="{{ student.moodle_id }}">
+            <input type="hidden" name="attempt_no" value="{{ attempt_no }}">
+            <input type="hidden" name="submit_marks" value="1">
+            
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Question Number</th>
+                            <th>Maximum Marks</th>
+                            <th>Obtained Marks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for question in questions %}
+                        <tr>
+                            <td>Question {{ question.question_number }}</td>
+                            <td>{{ question.max_marks }}</td>
+                            <td>
+                                <input type="number" class="form-control" 
+                                       name="obtained_marks_{{ question.question_id }}" 
+                                       min="0" max="{{ question.max_marks }}" 
+                                       value="{{ existing_marks.get(question.question_id, 0) }}" 
+                                       required>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <button type="submit" class="btn btn-success">Save Marks</button>
+            <a href="{{ url_for('enter_marks') }}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

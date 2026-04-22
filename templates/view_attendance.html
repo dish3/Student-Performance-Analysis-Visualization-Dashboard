@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}View Attendance{% endblock %}
+{% block content %}
+<h2 class="mb-4">Attendance Records</h2>
+
+<ul class="nav nav-tabs mb-3" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#daily" type="button">Daily Attendance</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#percentage" type="button">Attendance Percentage</button>
+    </li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade show active" id="daily">
+        <div class="d-flex justify-content-between mb-3">
+            <h4>Daily Attendance Records</h4>
+            <a href="{{ url_for('add_attendance') }}" class="btn btn-primary">Add Attendance</a>
+        </div>
+        {% if daily_records %}
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Moodle ID</th>
+                                <th>Roll No</th>
+                                <th>Name</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in daily_records %}
+                            <tr>
+                                <td>{{ record.moodle_id }}</td>
+                                <td>{{ record.roll_no }}</td>
+                                <td>{{ record.name }}</td>
+                                <td>{{ record.date.strftime('%Y-%m-%d') if record.date else 'N/A' }}</td>
+                                <td>
+                                    <span class="badge {% if record.status == 'Present' %}bg-success{% else %}bg-danger{% endif %}">
+                                        {{ record.status }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('delete_attendance', record_id=record.record_id) }}" 
+                                       class="btn btn-sm btn-danger" 
+                                       onclick="return confirm('Delete this record?')">Delete</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info">No daily attendance records found.</div>
+        {% endif %}
+    </div>
+    
+    <div class="tab-pane fade" id="percentage">
+        <div class="d-flex justify-content-between mb-3">
+            <h4>Attendance Percentage</h4>
+            <a href="{{ url_for('update_attendance_percentage') }}" class="btn btn-primary">Update Percentage</a>
+        </div>
+        {% if percentage_records %}
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Moodle ID</th>
+                                <th>Roll No</th>
+                                <th>Name</th>
+                                <th>Attendance %</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in percentage_records %}
+                            <tr>
+                                <td>{{ record.moodle_id }}</td>
+                                <td>{{ record.roll_no }}</td>
+                                <td>{{ record.name }}</td>
+                                <td>
+                                    <span class="badge {% if record.attendance_percent >= 75 %}bg-success{% elif record.attendance_percent >= 50 %}bg-warning{% else %}bg-danger{% endif %}">
+                                        {{ record.attendance_percent or 0 }}%
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info">No attendance percentage records found.</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

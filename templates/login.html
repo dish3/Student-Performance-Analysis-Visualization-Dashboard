@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Login – Student Performance Analysis and Visualization Dashboard{% endblock %}
+
+{% block auth_content %}
+<div class="card shadow-sm" style="border-radius:16px; overflow:hidden">
+  <!-- Header banner -->
+  <div style="background:linear-gradient(135deg,#4361ee,#7b2d8b); padding:32px 24px 24px; text-align:center">
+    <i class="fa-solid fa-graduation-cap" style="font-size:2.5rem; color:#fff; margin-bottom:10px; display:block"></i>
+    <h4 style="color:#fff; font-weight:700; margin:0">SPAVD</h4>
+    <p style="color:rgba(255,255,255,0.75); font-size:0.85rem; margin:4px 0 0">Student Performance Analysis and Visualization Dashboard</p>
+  </div>
+
+  <div class="card-body p-4">
+    <h5 class="fw-bold mb-4 text-center" style="color:#1e293b">Sign In</h5>
+    <form method="POST">
+      <div class="mb-3">
+        <label for="username" class="form-label">
+          <i class="fa-solid fa-user me-1 text-primary"></i> Username
+        </label>
+        <input type="text" class="form-control" id="username" name="username"
+               placeholder="Enter your username" required autofocus>
+      </div>
+      <div class="mb-4">
+        <label for="password" class="form-label">
+          <i class="fa-solid fa-lock me-1 text-primary"></i> Password
+        </label>
+        <input type="password" class="form-control" id="password" name="password"
+               placeholder="Enter your password" required>
+      </div>
+      <button type="submit" class="btn btn-primary w-100" style="padding:10px; font-size:0.95rem">
+        <i class="fa-solid fa-right-to-bracket me-2"></i>Login
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

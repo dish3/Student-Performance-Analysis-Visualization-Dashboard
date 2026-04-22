@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Add Attendance{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <h2 class="mb-4">Add Daily Attendance</h2>
+        <div class="card">
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="moodle_id" class="form-label">Select Student</label>
+                        <select class="form-select" id="moodle_id" name="moodle_id" required>
+                            <option value="">-- Choose Student --</option>
+                            {% for student in students %}
+                            <option value="{{ student.moodle_id }}">{{ student.moodle_id }} - {{ student.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="date" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="date" name="date" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-select" id="status" name="status" required>
+                            <option value="">-- Choose Status --</option>
+                            <option value="Present">Present</option>
+                            <option value="Absent">Absent</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Attendance</button>
+                    <a href="{{ url_for('view_attendance') }}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
