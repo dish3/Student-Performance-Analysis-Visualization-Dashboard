@@ -31,8 +31,9 @@ from werkzeug.security import check_password_hash, generate_password_hash
 # check_password_hash  – safely compare a plain password to a stored hash
 # generate_password_hash – hash a plain password before storing it
 
+import os
 import mysql.connector          # MySQL driver for Python
-from config import DB_CONFIG    # database connection settings (host, user, password, db)
+from config import APP_SECRET_KEY, DB_CONFIG
 
 from openpyxl import Workbook                          # used for the raw-data Excel export
 from openpyxl.styles import Font, PatternFill, Alignment  # cell styling for that export
@@ -48,7 +49,7 @@ import analytics_export        # pandas + xlsxwriter multi-sheet export
 app = Flask(__name__)
 # secret_key is required for session encryption.
 # Change this to a long random string in production!
-app.secret_key = 'your-secret-key-change-this-in-production'
+app.secret_key = APP_SECRET_KEY
 
 
 # ============================================================
@@ -64,7 +65,14 @@ def get_db_connection():
         conn = mysql.connector.connect(**DB_CONFIG)  # unpack dict as keyword args
         return conn
     except mysql.connector.Error as e:
+        safe_db_config = {
+            'host': DB_CONFIG.get('host'),
+            'port': DB_CONFIG.get('port'),
+            'user': DB_CONFIG.get('user'),
+            'database': DB_CONFIG.get('database')
+        }
         print(f"Database connection error: {e}")  # log to console for debugging
+        print(f"Database settings in use: {safe_db_config}")
         return None
 
 
@@ -1792,4 +1800,6 @@ def export_analysis():
 if __name__ == '__main__':
     # debug=True enables auto-reload on code changes and shows
     # detailed error pages. Turn this OFF in production.
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    debug = os.environ.get('FLASK_DEBUG', '').lower() in {'1', 'true', 'yes'}
+    app.run(host='0.0.0.0', port=port, debug=debug)
