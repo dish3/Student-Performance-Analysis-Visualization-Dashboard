@@ -69,15 +69,15 @@ Or in MySQL Workbench:
 - File → Open SQL Script → Select `database.sql`
 - Execute
 
-### 3. Configure Database
-Edit `config.py`:
-```python
-DB_CONFIG = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': 'YOUR_PASSWORD',  # Change this
-    'database': 'student_assessment_system'
-}
+### 3. Configure Environment Variables
+Set these environment variables before running the app:
+```bash
+APP_SECRET_KEY=replace-this-with-a-random-secret
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=YOUR_PASSWORD
+DB_NAME=student_assessment_system
 ```
 
 ### 4. Create Admin Account

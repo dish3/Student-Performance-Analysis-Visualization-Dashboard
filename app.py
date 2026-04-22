@@ -33,7 +33,6 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 import os
 import mysql.connector          # MySQL driver for Python
-from config import APP_SECRET_KEY, DB_CONFIG
 
 from openpyxl import Workbook                          # used for the raw-data Excel export
 from openpyxl.styles import Font, PatternFill, Alignment  # cell styling for that export
@@ -49,7 +48,30 @@ import analytics_export        # pandas + xlsxwriter multi-sheet export
 app = Flask(__name__)
 # secret_key is required for session encryption.
 # Change this to a long random string in production!
-app.secret_key = APP_SECRET_KEY
+app.secret_key = os.environ.get('APP_SECRET_KEY') or \
+    os.environ.get('SECRET_KEY') or \
+    'your-secret-key-change-this-in-production'
+
+
+def get_env(*names, default=None):
+    """Return the first non-empty environment variable from names."""
+    for name in names:
+        value = os.environ.get(name)
+        if value:
+            return value
+    return default
+
+
+DB_CONFIG = {
+    'host': get_env('DB_HOST', 'MYSQL_HOST', default='localhost'),
+    'port': int(get_env('DB_PORT', 'MYSQL_PORT', default='3306')),
+    'user': get_env('DB_USER', 'MYSQL_USER', default='root'),
+    'password': get_env('DB_PASSWORD', 'MYSQL_PASSWORD', default='root'),
+    'database': get_env(
+        'DB_NAME', 'MYSQL_DATABASE', 'MYSQL_DB',
+        default='student_assessment_system'
+    )
+}
 
 
 # ============================================================
@@ -58,7 +80,7 @@ app.secret_key = APP_SECRET_KEY
 
 def get_db_connection():
     """
-    Open and return a new MySQL connection using settings from config.py.
+    Open and return a new MySQL connection using environment settings.
     Returns None if the connection fails (caller must handle this).
     """
     try:
